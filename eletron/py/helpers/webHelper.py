@@ -1,4 +1,6 @@
 from selenium.common.exceptions import StaleElementReferenceException
+from time import sleep, time
+
 
 from bs4 import BeautifulSoup
 from bs4.element import Comment
@@ -6,6 +8,17 @@ import urllib.request
 import nltk
 # pip uninstall nltk-3.4.5 singledispatch-3.4.0.3 six-1.14.0 bs4
 
+##################################################### 
+#                   Sample test                     #
+# sleep(5)  # let the user actually see something!  #
+# search_box = driver.find_element_by_name('q')     #
+# search_box.send_keys('chromedriver')              #
+# search_box.submit()                               #
+# sleep(5) # let the user actually see something!   #
+#                                                   #
+#####################################################
+
+# Save webpage html to local directory
 def save_source(address, source):
   name = address.replace('.', '-') + '.html'
   path = './data/' + name
@@ -18,21 +31,18 @@ def save_source(address, source):
       f.close()
       return 'page created'
 
-
-def get_element_fonts(driver, selector):
-  elements = driver.find_elements_by_css_selector(selector)
+# Get elements on page, find unique fonts
+def get_element_fonts(driver):
+  elements = driver.find_elements_by_css_selector("*")
   fonts = []
-  for i, e in enumerate(elements):
-      try:
-          if e.value_of_css_property('display') != "none":
-              font_family = map(str.strip, e.value_of_css_property('font-family').split(","))
-              fonts.extend(font_family)
-      except StaleElementReferenceException as e:
-          print(e)
-  
+  try:
+    [ fonts.extend(map(str.strip, e.value_of_css_property('font-family').split(","))) for e in elements ]
+  except StaleElementReferenceException as e:
+      print(e)
   return list(set(fonts))
-
+    
 ###########################################################################
+#                         ***FIX***
 def get_inner_html(driver):  # incomplete
   # elements = driver.find_elements_by_css_selector("*")
   # text = ""
@@ -78,36 +88,35 @@ def text_from_html(body):
     texts = soup.findAll(text = True)
     visible_texts = filter(tag_visible, texts)
     return u" ".join(t.strip() for t in visible_texts)
-#############################################################
+#                              ***FIX***
+############################################################################
 
+# Get elemets, find unique colors
 def get_text_colors(driver):
   elements = driver.find_elements_by_css_selector("*")
   text_colors = []
-  for i, e in enumerate(elements):
-      try:
-          if e.value_of_css_property('display') != "none":
-              text_color =  e.value_of_css_property('color')
-              text_colors.append(text_color)
-      except StaleElementReferenceException as e:
-          print(e)
+
+  try:
+    [ text_colors.append(e.value_of_css_property('color')) for e in elements ]
+  except StaleElementReferenceException as e:
+      print(e)
 
   return list(set(text_colors))
 
+# Get elements, find unique background colors
 def get_background_colors(driver):
   elements = driver.find_elements_by_css_selector("*")
   background_colors = []
   
-  for i, e in enumerate(elements):
-      try:
-          if e.value_of_css_property('display') != "none":
-              background_color = e.value_of_css_property("background-color")
-              background_colors.append(background_color)
-              # ADD FOR PROPERTY:background
-      except StaleElementReferenceException as e:
-          print(e)
+  try:
+    [ background_colors.append(e.value_of_css_property('background-color')) for e in elements ]
+    # 'background' property may contain a set color as well as other properties
+  except StaleElementReferenceException as e:
+      print(e)
 
   return list(set(background_colors))
 
+# Compare list to entries in NoGo file
 def nogo_search(file_name, lst):
   found = []
   try:
@@ -121,37 +130,39 @@ def nogo_search(file_name, lst):
 
   return None if len(found)==0 else found
 
-def check_response(driver):
+# Get links on page, run links and record frontend/backend response times compared to navigation start
+def check_response(driver): # https://www.lambdatest.com/blog/how-to-measure-page-load-times-with-selenium/
   elements = driver.find_elements_by_css_selector('a')
   hrefs = []
-  times = []
-  for i, e in enumerate(elements):
-      try:
-          if e.value_of_css_property('display') != "none":
-              href = e.get_attribute("href")
-              hrefs.append(href)
-              print(href)
-      except StaleElementReferenceException as e:
-          print(e)
+  backend_performance = []
+  frontend_performance = []
 
-  for href in hrefs[0]:
+  try:
+    [ hrefs.append(e.get_attribute("href")) for e in elements ]
+  except StaleElementReferenceException as e:
+      print(e)
+
+  for href in hrefs[0:3]:
     driver.get(href)
+    sleep(10)
  
-    ''' Use Navigation Timing  API to calculate the timings that matter the most '''   
-    
+    # Use Navigation Timing  API to calculate the timings
+    # Methods return time in milliseconds    
     navigationStart = driver.execute_script("return window.performance.timing.navigationStart")
     responseStart = driver.execute_script("return window.performance.timing.responseStart")
     domComplete = driver.execute_script("return window.performance.timing.domComplete")
     
-    ''' Calculate the performance'''
-    backendPerformance_calc = responseStart - navigationStart
-    frontendPerformance_calc = domComplete - responseStart
-    times.append(backendPerformance_calc)
-    times.append(frontendPerformance_calc)
+    # Calculate the performance
+    # Add times to the lists
+    backend_performance.append(responseStart - navigationStart)
+    frontend_performance.append(domComplete - responseStart)
     
-    time.sleep(5)
-  return times
+  return backend_performance, frontend_performance
 
-
+# Get locations of elements across domain
 def get_location(driver):
     pass
+
+# Check for entry validity configuration
+def entry_validation_check(driver):
+  pass

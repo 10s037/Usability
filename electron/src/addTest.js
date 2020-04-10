@@ -1,11 +1,11 @@
-var { ipcRenderer } = require('electron');
+const {ipcRenderer} = require('electron');
 
 // Handle submit button
 function getCheckedBoxes(e){
   e.preventDefault();
-  var label = document.getElementById('test-label');
-  var checkboxes = document.getElementsByName('test');
-  var checkedBoxes = []
+  const label = document.getElementById('test-label');
+  const checkboxes = document.getElementsByName('test');
+  const checkedBoxes = [];
 
   // Add checked boxes to array to send to main process
   for (var i = 0; i < checkboxes.length; i++){
@@ -15,7 +15,7 @@ function getCheckedBoxes(e){
   }
 
   //if no test is selected send all tests to main process
-  if(checkedBoxes.length == 0){
+  if(checkedBoxes.length === 0){
     checkboxes.forEach(box => {
       checkedBoxes.push(box.value);
     });
@@ -27,11 +27,11 @@ function getCheckedBoxes(e){
 // Uncheck all other boxes if all tests is checked
 function allChecked(){
   allCheckbox = document.getElementById('all');
-  savedTests = []
-  if(allCheckbox.checked){
+  let allTests;
+  if (allCheckbox.checked) {
     allTests = document.getElementsByName('test');
     allTests.forEach(test => {
       test.checked = false;
     });
-    }  
+  }
 }

@@ -1,11 +1,11 @@
-var { ipcRenderer } = require('electron');
+const {ipcRenderer} = require('electron');
+const url = "http://127.0.0.1:5000";
 
-var url = "http://127.0.0.1:5000";
-var count = 0;
-var clicked = null
-initiated = false
+let count = 0;
+let clicked = null;
+let initiated = false;
 
- function http(end) {
+function http(end) {
     return new Promise(resolve => {
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function () {
@@ -49,12 +49,12 @@ ipcRenderer.on('add-test', function (e, data) {
 });
 
 async function callTests(){
-    if(clicked){
-        var result = "";
-        if(!initiated){
+    if (clicked) {
+        let result = "";
+        if (!initiated) {
             console.log("Initializing Driver");
             result = await http('/init');
-            if (result.result == "success"){
+            if (result.result === "success") {
                 initiated = true
             }
             console.log(result);
@@ -62,12 +62,12 @@ async function callTests(){
             result = await http('/get');
             console.log(result);
         }
-        
-        var tests = []
-        for(var i = 0; i < clicked.childNodes.length; i ++ ){
+
+        var tests = [];
+        for (var i = 0; i < clicked.childNodes.length; i++) {
             var node = clicked.childNodes[i];
-            if(node.nodeName == "#text"){
-                test = node.data.trim()
+            if (node.nodeName === "#text") {
+                test = node.data.trim();
                 tests.push(test);
                 console.log("Running Test for " + test);
                 result = await http('/' + test)
@@ -77,20 +77,20 @@ async function callTests(){
 
         console.log("Ending Test");
         result = await http('/quit');
-        console.log(result)
+        console.log(result);
         alert("Testing Finished & Processes Stopped")
-    }else{
+    } else {
         alert("Must pick test to run");
     }
 }
 
 function clearTests(){
     const allTests = document.getElementById('tests');
-    allTests.innerHTML = ""
+    allTests.innerHTML = "";
     count = 0
 }
 
 function stopTests(){
     http('/quit');
-    initiated = false;
+    let initiated = false;
 }

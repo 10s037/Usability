@@ -26,9 +26,9 @@ app.on('ready', function () {
     //prom();
 
     // Build menu from template
-    const mainMenu = Menu.buildFromTemplate(mainMenuTemplate);
+   // const mainMenu = Menu.buildFromTemplate(mainMenuTemplate);
     // Insert menu
-    Menu.setApplicationMenu(mainMenu);
+  //  Menu.setApplicationMenu(mainMenu);
 });
 
 app.on('window-all-closed', () => {
@@ -124,7 +124,7 @@ const mainMenuTemplate = [
             },
             {
                 label: 'Quit',
-                accelerator: process.platform == 'darwin' ? 'Command+Q' : 'Ctrl+Q',
+                accelerator: process.platform === 'darwin' ? 'Command+Q' : 'Ctrl+Q',
                 click() {
                     app.quit();
                 }
@@ -134,19 +134,19 @@ const mainMenuTemplate = [
 ];
 
 // If mac, add empty object to menu
-if (process.platform == 'darwin') {
+if (process.platform === 'darwin') {
     // array method adds to beginning to array
     mainMenuTemplate.unshift({});
 }
 
 // Add developer tools if not in production
-if (process.env.NODE_ENV != 'production') {
+if (process.env.NODE_ENV !== 'production') {
     mainMenuTemplate.push({
         label: 'Developer-Tools',
         submenu: [
             {
                 label: 'Toggle DevTools',
-                accelerator: process.platform == 'darwin' ? 'Command+I' : 'Ctrl+I',
+                accelerator: process.platform === 'darwin' ? 'Command+I' : 'Ctrl+I',
                 click(item, focusedWindow) {
                     focusedWindow.toggleDevTools();
                 }
